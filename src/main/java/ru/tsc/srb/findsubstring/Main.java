@@ -44,9 +44,9 @@ public class Main {
         executorService.shutdown();
 
         try {
-            executorService.awaitTermination(10, TimeUnit.MINUTES);
+            executorService.awaitTermination(1, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
-            System.out.println("Время выполнения превысило 10 минут");
+            System.out.println("Поток был прерван");
             return;
         }
 
