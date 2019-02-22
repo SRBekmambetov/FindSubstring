@@ -46,7 +46,7 @@ public class Main {
         try {
             executorService.awaitTermination(10, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
-            System.out.println("Время превысило 10 минут");
+            System.out.println("Время выполнения превысило 10 минут");
             return;
         }
 
