@@ -57,7 +57,7 @@ public class Main {
         try {
             writeFile.writeFileFromList(outputFile, timeOfCompletion);
         } catch (IOException e) {
-            System.out.println("Папка не доступна для записи");
+            System.out.println("Папка недоступна для записи");
         }
     }
 }
