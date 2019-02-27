@@ -1,18 +1,26 @@
 package ru.tsc.srb.findsubstring;
 
-import org.apache.commons.io.FileUtils;
-
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ConcurrentModificationException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ForkJoinPool;
 
 public class Main {
 
+    public static List<String> fileExtensions;
+
+    public static BufferedWriter bufferedWriter;
+
+    private static ForkJoinPool forkJoinPool;
+
     public static void main(String[] args) {
+
+        long startTime = System.currentTimeMillis();
+
+        Main main = new Main();
 
         if (args.length < 5) {
             System.out.println("Некорретно введены данные");
@@ -20,50 +28,42 @@ public class Main {
         }
 
         int numberOfThreads = Integer.parseInt(args[0]);
-        String substring = args[1];
-        String dirName = args[2];
+        String searchedSubstring = args[1];
+        String path = args[2];
         String outputFile = args[3];
-        String[] fileExtensions = new String[args.length - 4];
-        for (int i = 0; i < fileExtensions.length; i++) {
-            fileExtensions[i] = args[i + 4];
-        }
-        List<File> files = (List<File>) FileUtils.listFiles(new File(dirName), fileExtensions, true);
-
-        if (files.isEmpty()) {
-            System.out.println("Нет файлов с введенными расширениями");
-            return;
+        fileExtensions = new ArrayList<>();
+        for (int i = 4; i < args.length; i++) {
+            fileExtensions.add(args[i]);
         }
 
-        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
-
-        long start = System.currentTimeMillis();
-
-        for (File file: files) {
-            executorService.submit(new FindSubstring(file, substring));
-        }
-
-        executorService.shutdown();
+        forkJoinPool = new ForkJoinPool(numberOfThreads);
 
         try {
-            executorService.awaitTermination(1, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            System.out.println("Поток был прерван");
-            return;
-        }
-
-
-        long timeOfCompletion = System.currentTimeMillis() - start;
-
-        WriteFile writeFile = new WriteFile();
-
-        try {
-            writeFile.writeFileFromList(outputFile, timeOfCompletion);
+            bufferedWriter = new BufferedWriter(new FileWriter(new File(outputFile)));
         } catch (IOException e) {
-            System.out.println("Папка недоступна для записи");
-            return;
-        } catch (ConcurrentModificationException e) {
-            System.out.println("Прошло более 1-ой минуты");
+            System.out.println("Не доступна папка для записи");
             return;
         }
+
+        Folder folder = Folder.fromDirectory(new File(path));
+
+        String result = main.foundSubstring(folder, searchedSubstring);
+
+        System.out.println(result);
+
+        long stopTime = System.currentTimeMillis();
+        try {
+            bufferedWriter.append(Long.toString(stopTime - startTime));
+            bufferedWriter.flush();
+            bufferedWriter.close();
+        } catch (IOException e) {
+            System.out.println("Файл не доступен для записи");
+        }
+
+        System.out.println(stopTime - startTime);
+    }
+
+    public String foundSubstring(Folder folder, String searchedSubstring) {
+        return forkJoinPool.invoke(new FolderSearchTask(folder, searchedSubstring));
     }
 }
