@@ -27,11 +27,26 @@ public class Main {
             return;
         }
 
-        int numberOfThreads = Integer.parseInt(args[0]);
+        int numberOfThreads = 0;
+
+        try {
+            numberOfThreads = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            System.out.println("Количество потоков введено не верно");
+            return;
+        }
+
+        if (numberOfThreads < 1) {
+            System.out.println("Введено неположительное число потоков");
+            return;
+        }
+
         String searchedSubstring = args[1];
         String path = args[2];
         String outputFile = args[3];
+
         fileExtensions = new ArrayList<>();
+
         for (int i = 4; i < args.length; i++) {
             fileExtensions.add(args[i]);
         }
