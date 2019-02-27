@@ -67,6 +67,7 @@ public class Main {
         System.out.println(result);
 
         long stopTime = System.currentTimeMillis();
+
         try {
             bufferedWriter.append(Long.toString(stopTime - startTime));
             bufferedWriter.flush();
