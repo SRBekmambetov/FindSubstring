@@ -58,6 +58,7 @@ public class Main {
             bufferedWriter.close();
         } catch (IOException e) {
             System.out.println("Файл не доступен для записи");
+            return;
         }
 
         System.out.println(stopTime - startTime);
